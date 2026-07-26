@@ -158,3 +158,39 @@ cd nss/example_mason && nwnsc -i . -i .. -i <base-scripts> -b /tmp mason_*.nss
 
 `nwnsc` appends the input path to `-b`, which is why these run from inside the
 source directories.
+
+---
+
+## Maintaining
+
+Changing the API, the example, or a documented engine/tileset fact means updating
+**every** place that describes it. Changing one and not the others is the failure
+mode here:
+
+| # | File | Holds |
+| --- | --- | --- |
+| 1 | `nss/inc_tile.nss` | Header comment block |
+| 2 | `README.md` | Files table, API summary, install/verify commands |
+| 3 | `TILES.md` | Full reference — usually needs the most |
+| 4 | `.claude/skills/nwn-tile-editing/SKILL.md` | In-repo skill |
+| 5 | `~/.claude/skills/nwn-tile-editing/SKILL.md` | Global skill, if installed |
+
+**4 and 5 are two copies that intentionally differ and are deliberately not
+symlinked** — the repo copy uses repo-relative paths and carries a "ships inside
+the repo" blockquote; a global install uses absolute paths. A symlink would break
+one context or the other. After editing either, `diff` them: only the
+`description:` line, that blockquote, and ~7 path lines should differ.
+
+Before calling a change done:
+
+- **Compile** — the commands above.
+- **If the API changed**, extend a throwaway harness that calls every public
+  function and every default-argument overload. Unreferenced functions in an
+  include are otherwise never code-generated, so errors in them stay hidden.
+- **If rotation or offset maths changed**, re-run the bijection check outside the
+  game: for each size and rotation the mapping must land exactly on the original
+  footprint (nothing lost or duplicated), the direction must be what you claim, and
+  four 90° turns must return to identity including orientations.
+- **If tile IDs or `.set` handling changed**, re-verify against a real `.set` with
+  `tools/set_groups.py`.
+- **Check every path and symbol** named in the docs still resolves.
