@@ -128,6 +128,11 @@ tile's position and its own orientation. Square only: rotating a `W x H` block 9
 produces an `H x W` block, which cannot be written back over the original
 footprint. `TileBlockRotate180` handles rectangles, because 180° preserves shape.
 
+Worth knowing how often that limit applies: **non-square features outnumber square
+ones** in most tilesets. In tcn01, 25 of the 41 multi-tile features are non-square;
+ttf01 is 7 of 13, tdc01 6 of 11, trm02 30 of 46. So for a majority of tileset
+features, 180° is the only in-place rotation available.
+
 **This is a terrain tool, not a way to reface a building.** The four tiles of a
 tileset tower are four *different* models, one per quadrant — tcn01's
 `CloakTower_2x2` is `u01`/`u02`/`v01`/`v02`. Rotating a tile only spins that
@@ -145,35 +150,76 @@ Tile IDs are indexes into the tileset's `.set` file and mean nothing outside it 
 ID 277 is a tower quadrant in tcn01 and something unrelated in any other tileset.
 There is no way to read a `.set` from NWScript, so the lookup is a build-time job.
 
-Extract the `.set`, then let `tools/set_groups.py` do the mapping:
+Extract the `.set`, then survey it with `tools/set_analyze.py`:
 
 ```sh
 nwn_resman_cat --root ~/nwn-data --userdirectory ~/nwn-data/user \
     tcn01.set > /tmp/tcn01.set
-python3 tools/set_groups.py /tmp/tcn01.set tower
+python3 tools/set_analyze.py /tmp/tcn01.set          # full survey
+python3 tools/set_analyze.py /tmp/tcn01.set shapes   # just the shape census
 ```
 
-which prints, ready to paste:
+Once you know which feature you want, `tools/set_groups.py` emits it:
+
+```sh
+python3 tools/set_groups.py /tmp/tcn01.set cloaktower
+```
 
 ```nwscript
-// GROUP68 CloakTower_2x2  2x2
+// GROUP68 CloakTower_2x2  2x2 (columns x rows)
 json jGroup = TileGroup();
-jGroup = TileGroupAdd(jGroup, 0, 1, 282, 0);        // tcn01_u02_01
-jGroup = TileGroupAdd(jGroup, 1, 1, 284, 0);        // tcn01_v02_01
 jGroup = TileGroupAdd(jGroup, 0, 0, 277, 0);        // tcn01_u01_01
 jGroup = TileGroupAdd(jGroup, 1, 0, 283, 0);        // tcn01_v01_01
+jGroup = TileGroupAdd(jGroup, 0, 1, 282, 0);        // tcn01_u02_01
+jGroup = TileGroupAdd(jGroup, 1, 1, 284, 0);        // tcn01_v02_01
 ```
 
-The row flip matters. A `.set` group lists its tiles row-major starting from the
-**north** row, so `Tile0` is the north-west corner, while library groups use
-offsets from the **south-west** with `+y` north. `set_groups.py` applies the flip;
-if you read a `.set` by hand, apply it yourself. The mapping is
-`Tile[row * columns + column]` → offset `(column, rows - 1 - row)`, confirmed
-against tcn01's model names (`Tile0` = 282 = `tcn01_u02_01`, the north-west
-quadrant).
+For a tileset in a hak, unpack it first with `nwn_erf -x -f some.hak`.
 
-For a tileset that lives in a hak, unpack the hak first with
-`nwn_erf -x -f some.hak`.
+### Four things that bite when reading a .set
+
+**1. The row flip.** A `.set` group lists its tiles row-major starting from the
+**north** row, so `Tile0` is the north-west corner, while library groups use
+offsets from the **south-west** with `+y` north. The mapping is
+`Tile[row * columns + column]` → offset `(column, rows - 1 - row)`. Both tools
+apply it; if you read a `.set` by hand, apply it yourself.
+
+This is verified, not assumed. Tile models are named
+`<set>_<letters><number>_<variant>`, and in a rectangular feature one part varies
+with the column and the other with the row — so the declared layout can be
+checked independently of any arithmetic. Across six stock tilesets (tcn01, ttf01,
+tdc01, tin01, ttu01, trm02) `set_analyze.py` confirms **389 of 397** features this
+way.
+
+**2. Group names lie about shape.** Stock tcn01 contains both `SlumHouse_1x2` and
+`Market_2x1` — *the same shape*, `Rows=1 Columns=2`, named opposite ways. 18 of
+tcn01's names state rows×columns rather than columns×rows; ttf01 has 6, tdc01 5.
+**Always read `Rows=`/`Columns=`,** never the name. `set_analyze.py` prints the
+real shape and flags names that contradict it.
+
+**3. Features are not always solid rectangles.** A `Tile` value of `-1` is a
+**hole**: a square of the bounding box that is not part of the feature, meaning
+"leave whatever is already there". `-1` is not a tile ID and must never be
+stamped. This is common, not exotic — tcn01 has 2 holed features
+(`Merchant_Docked`, `Weathered_Docked`), ttf01 and tdc01 one each, and trm02 has
+seven including a 5×3 `Castle3x5`. `set_groups.py` skips holes, and
+`SetTileAt`/`TileBatchAdd`/`TileGroupAdd` all drop negative tile IDs rather than
+pass them to the engine.
+
+**4. Some features are hand-assembled.** A handful borrow a tile from elsewhere in
+the tileset rather than using a clean block — tcn01's `StateBuilding02` reuses
+`y08` where `y07`'s neighbour would be expected. `set_analyze.py` reports these as
+`irregular`. They are perfectly usable; it only means the model-name cross-check
+can't confirm them, and `Rows`/`Columns` stays authoritative.
+
+### Picking a tile to fill an area with
+
+`set_analyze.py ... fill` lists, per terrain type, the tiles that are safe to tile
+a whole area with: every corner the same terrain at the same height and no edge
+crosser. The height part matters — a tile with unequal corner heights is a height
+*transition* and will not tile cleanly against itself. Stock tcn01's `TILE0` is
+exactly that trap (three corners at height 1, one at 0), so "just use tile 0" is
+wrong. tcn01 has 221 genuinely flat cobble tiles to choose from instead.
 
 ### Guard the tileset
 

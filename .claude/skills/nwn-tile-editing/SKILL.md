@@ -81,11 +81,15 @@ tile or pass `GetLocation(OBJECT_SELF)` straight through. Both are wrong.
 
 ### The .set file
 
-Plain INI. Two section types matter:
+Plain INI. `[GENERAL]` (default/floor/border terrain), `[TERRAIN*]`/`[CROSSER*]`
+type names, `[TILEn]` per tile, `[GROUPn]` per multi-tile feature:
 
 ```ini
 [TILE277]
-Model=tcn01_u01_01          ; the model; the number in [TILEnnn] is the tile ID
+Model=tcn01_u01_01          ; the number in [TILEnnn] IS the tile ID
+TopLeft=cobble              ; corner terrain, x4
+TopLeftHeight=1             ; corner height, x4 - unequal means height transition
+Top=                        ; edge crosser (wall/road/stream), x4
 
 [GROUP68]
 Name=CloakTower_2x2
@@ -97,15 +101,34 @@ Tile2=277
 Tile3=283
 ```
 
-**`GROUP` tiles are listed row-major from the NORTH**, so `Tile0` is the
-north-west corner. Verified against model names: `Tile0`=282=`tcn01_u02_01`, and
-in this tileset's naming the letter varies with column and the number with row
-(`u01` south-west, `u02` north-west). If your code uses south-west-origin offsets
-with `+y` north (the library does), you must flip the rows:
+**Never hand-read a .set — run `tools/set_analyze.py` on it.** Four traps, all
+verified against six stock tilesets:
 
-```
-Tile[row * columns + column]  ->  offset (column, rows - 1 - row)
-```
+1. **Row flip.** `GROUP` tiles are row-major from the **NORTH**, so `Tile0` is the
+   north-west corner, while library groups use south-west-origin offsets with `+y`
+   north: `Tile[row * columns + column]` → offset `(column, rows - 1 - row)`.
+2. **Group names lie about shape.** tcn01 has `SlumHouse_1x2` *and* `Market_2x1` —
+   the same `Rows=1 Columns=2` shape, named opposite ways. 18 tcn01 names state
+   rows×columns. **Read `Rows=`/`Columns=`, never the name.**
+3. **`Tile=-1` is a hole**, not a tile ID — a square of the bounding box that
+   isn't part of the feature ("leave what's there"). Features are not always solid
+   rectangles. Common: tcn01 2, ttf01 1, tdc01 1, trm02 7. The library drops
+   negative IDs in all three write paths rather than stamping them.
+4. **`[TILES] Count` can disagree** with the `[TILEn]` sections present, and
+   `[TILEnDOORm]` sections are door definitions, not tiles. `set_analyze.py
+   <set> integrity` checks this.
+
+The flip is confirmed independently, not assumed: models are named
+`<set>_<letters><number>_<variant>` and in a rectangular feature one part varies
+with the column and the other with the row — which axis is *not* universal (tcn01
+uses letters for columns, the Ampitheater's `amp01` does the opposite), so the
+analyzer tries both. It confirms 389 of 397 features across six tilesets; the
+remainder are hand-assembled from non-adjacent tiles, which is legal.
+
+**Filling an area:** use `set_analyze.py <set> fill` for tiles that are flat
+(all four corner heights equal), single-terrain and crosser-free. Do not reach for
+tile 0 — tcn01's `TILE0` has three corners at height 1 and one at 0, so it is a
+height transition that won't tile against itself.
 
 ### Engine API (verified signatures)
 
@@ -218,23 +241,32 @@ Gotcha: always assign the result of `TileBatchAdd`/`TileGroupAdd`
 
 ### Getting tile IDs
 
-Build-time job — a `.set` cannot be read from NWScript. Use the bundled tool:
+Build-time job — a `.set` cannot be read from NWScript. Use the bundled tools:
 
 ```sh
 nwn_resman_cat --root ~/nwn-data --userdirectory ~/nwn-data/user \
     tcn01.set > /tmp/tcn01.set
-python3 tools/set_groups.py /tmp/tcn01.set tower
+python3 tools/set_analyze.py /tmp/tcn01.set            # survey first
+python3 tools/set_analyze.py /tmp/tcn01.set shapes     # general|integrity|shapes|fill|groups
+python3 tools/set_groups.py  /tmp/tcn01.set cloaktower # then emit one feature
 ```
 
-It prints ready-to-paste `TileGroupAdd()` lines with the north-row flip already
-applied and the model name in a trailing comment. For a hak tileset, unpack it
+`set_analyze.py` reports every feature's real shape and layout, holes, flat filler
+tiles and integrity problems — run it before trusting anything about an unfamiliar
+tileset. `set_groups.py` prints ready-to-paste `TileGroupAdd()` lines with the
+north-row flip already applied, holes skipped, and the model name in a trailing
+comment. For a hak tileset, unpack it
 first: `nwn_erf -x -f some.hak`.
 
 ## Rotation: what it can and cannot do
 
 `TileBlockRotate(oArea, nX, nY, nSize, nRotation, nFlags)` rotates a **square**
 block in place, turning both each tile's position and its own orientation.
-Square only — rotating `W x H` by 90° yields `H x W`, which cannot be written back
+Square only — and that limit bites often, because **non-square features outnumber
+square ones** in most tilesets (tcn01: 25 of 41 multi-tile; trm02: 30 of 46). For
+most tileset features 180° is the only in-place rotation available.
+
+Rotating `W x H` by 90° yields `H x W`, which cannot be written back
 over the original footprint. `TileBlockRotate180` handles rectangles (180°
 preserves shape).
 

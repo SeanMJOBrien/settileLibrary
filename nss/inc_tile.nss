@@ -279,8 +279,14 @@ int GetTileHeightAt(object oArea, int nX, int nY)
     return GetTileHeight(TileLocation(oArea, nX, nY));
 }
 
+// A negative tile ID is never a tile. It is what a .set uses inside a group to
+// mark a square of the bounding box that is NOT part of the feature - a hole, as
+// in tcn01's Merchant_Docked, meaning "leave whatever is already there". Since
+// tile IDs get transcribed out of .set files by hand, all three write paths drop
+// negatives instead of handing them to the engine.
 int SetTileAt(object oArea, int nX, int nY, int nTileID, int nOrientation, int nHeight = 0, int nFlags = SETTILE_FLAG_RECOMPUTE_LIGHTING)
 {
+    if (nTileID < 0) return FALSE;
     if (!TileInBounds(oArea, nX, nY)) return FALSE;
     SetTile(TileLocation(oArea, nX, nY), nTileID,
             TileRotateOrientation(nOrientation, 0), nHeight, nFlags);
@@ -296,6 +302,7 @@ json TileBatch()
 
 json TileBatchAdd(json jBatch, object oArea, int nX, int nY, int nTileID, int nOrientation, int nHeight = 0)
 {
+    if (nTileID < 0) return jBatch;           // hole - see the note on SetTileAt
     if (!TileInBounds(oArea, nX, nY)) return jBatch;
 
     json jTile = JsonObject();
@@ -331,6 +338,8 @@ json TileGroup()
 
 json TileGroupAdd(json jGroup, int nOffsetX, int nOffsetY, int nTileID, int nOrientation, int nHeight = 0)
 {
+    if (nTileID < 0) return jGroup;           // hole - see the note on SetTileAt
+
     json jTile = JsonObject();
     JsonObjectSetInplace(jTile, "dx",          JsonInt(nOffsetX));
     JsonObjectSetInplace(jTile, "dy",          JsonInt(nOffsetY));

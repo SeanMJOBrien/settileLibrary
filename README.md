@@ -75,7 +75,12 @@ coupling removed.
 
 | File | Purpose |
 | --- | --- |
-| `set_groups.py` | Reads a tileset `.set` and prints its groups as ready-to-paste `TileGroupAdd()` calls, applying the north-row flip. |
+| `set_analyze.py` | Surveys a whole `.set`: every feature's real shape and layout, holes, flat filler tiles, and data-integrity checks. Start here for an unfamiliar tileset. |
+| `set_groups.py` | Emits one feature as ready-to-paste `TileGroupAdd()` calls, applying the north-row flip and skipping holes. |
+| `setfile.py` | Shared `.set` parsing used by both. |
+
+Both tools are stdlib-only Python 3 and take a plain `.set` file, so they work on
+stock, hak and custom tilesets alike.
 
 ### Claude Code skill (`.claude/skills/`)
 
