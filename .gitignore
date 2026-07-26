@@ -1,0 +1,6 @@
+# Compiler output
+*.ncs
+*.ndb
+
+# Local build scratch (include shims, etc.)
+.build/
