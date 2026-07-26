@@ -77,6 +77,12 @@ coupling removed.
 | --- | --- |
 | `set_groups.py` | Reads a tileset `.set` and prints its groups as ready-to-paste `TileGroupAdd()` calls, applying the north-row flip. |
 
+### Claude Code skill (`.claude/skills/`)
+
+| File | Purpose |
+| --- | --- |
+| `nwn-tile-editing/SKILL.md` | How tiles work and how to use this library, written for [Claude Code](https://claude.com/claude-code). Loads automatically when working in this checkout; copy to `~/.claude/skills/` to use it from other projects. |
+
 ---
 
 ## Installing
