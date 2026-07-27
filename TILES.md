@@ -106,6 +106,40 @@ so stamping a 2x2 group at 90° shifts its footprint one tile west. That is the
 documented contract, and it is why the mason swaps groups rather than re-stamping
 a rotated one.
 
+### Never reason about a footprint with a width and height
+
+`TileGroupTiles` returns the exact squares a group would cover, rotation applied,
+as a *tile list* — a JSON array read back with `TileListCount` / `TileListX` /
+`TileListY`. It touches nothing, so it also answers "which squares would this
+cover?" before committing.
+
+Use it instead of storing a width and height, because a bounding box is the wrong
+shape to reason with:
+
+- Features are frequently **non-square** — the majority, in most tilesets.
+- Some are **not solid rectangles at all**. A `.set` can leave holes in a feature's
+  bounding box, and a box-based collision check would then falsely claim squares
+  the feature does not occupy. `Merchant_Docked` is 5 tiles in a 2×3 box; the sixth
+  square stays free for something else to use.
+- **Rotation moves the offsets**, so a box computed at rotation 0 is wrong at 90°.
+
+```nwscript
+json jTiles = TileGroupTiles(oArea, nX, nY, nRotation, jGroup);
+
+int nIndex;
+for (nIndex = 0; nIndex < TileListCount(jTiles); nIndex++)
+{
+    int nTileX = TileListX(jTiles, nIndex);
+    int nTileY = TileListY(jTiles, nIndex);
+    // ... bounds check, collision mark, edge test, keep-out check
+}
+```
+
+`inc_mason.nss` is written this way throughout and is the pattern to copy: it holds
+a mixed catalogue (2×2 tower, 2×1 guard post) with no size constant anywhere,
+deriving collision, reload flags and get-out-of-the-way behaviour from the tile
+list alone.
+
 ### Snapshot and undo
 
 `TileSnapshotRect` captures a rectangle and `TileSnapshotGroup` captures exactly
@@ -283,10 +317,15 @@ Each option is then gated so players are only offered what is actually possible:
 
 | Player option | Conditional | Action | Library call |
 | --- | --- | --- | --- |
-| Raise a watchtower on this spot. | `mason_c_new` — right tileset, fits, nothing too close | `mason_raise` | `TileSnapshotGroup` then `TileGroupStamp` |
-| Let the tower fall to ruin. | `mason_c_int` — work nearby and currently whole | `mason_ruin` | `TileGroupStamp` with the ruin group |
-| Rebuild the ruin whole again. | `mason_c_rui` — work nearby and currently ruined | `mason_build` | `TileGroupStamp` with the tower group |
+| Raise a watchtower on this spot. | `mason_c_new` — right tileset, room for the smallest entry | `mason_raise` | `TileSnapshotGroup` then `TileGroupStamp` (2×2) |
+| Put up a guard post instead. | `mason_c_new` | `mason_post` | same, with a **2×1** group |
+| Let the tower fall to ruin. | `mason_c_int` — nearby work has a ruined form | `mason_ruin` | `TileGroupStamp` with the ruin group |
+| Rebuild the ruin whole again. | `mason_c_rui` — nearby work has a whole form | `mason_build` | `TileGroupStamp` with the tower group |
 | Pull it down altogether. | `mason_c_old` — any work nearby | `mason_raze` | `TileBatchApply` of the saved snapshot |
+
+Per-entry fit and collision are checked in the *actions*, not the conditionals,
+because what fits depends on which entry the player picks; the conditional only
+asks whether the mason can work here at all. Each action reports why it refused.
 
 Each result line loops back to the greeting, so the status token is re-evaluated
 and the option list narrows or widens as the ground changes. Every action script
@@ -299,19 +338,23 @@ valid however often the variant is swapped.
 
 ### State
 
-State lives in local variables on the **area**, keyed by the structure's origin
-tile, so several towers can coexist:
+State lives in local variables on the **area**, so structures of different shapes
+coexist:
 
-- `mason_undo_<x>_<y>` — the tiles that were there before, as a `JsonDump`ed
-  batch. Its presence is also the "something of mine stands here" flag, which is
-  why razing deletes it.
-- `mason_ruin_<x>_<y>` — set while the ruined variant is standing.
+- `mason_undo_<x>_<y>` — keyed by origin: the tiles that were there before, as a
+  `JsonDump`ed batch. Its presence is also the "something of mine has its origin
+  here" flag, which is why razing deletes it.
+- `mason_kind_<x>_<y>` — keyed by origin: which catalogue entry stands here, `+1`
+  so that 0 means none.
+- `mason_occ_<x>_<y>` — keyed by **every square a structure covers**. This is what
+  makes collision exact for mixed sizes and for holed features, where a
+  bounding-box test would be wrong.
 
-Ruin, rebuild and raze do not require the player to stand on the tower (they are
-moved off it when it is raised). Each searches out to `MASON_SEARCH_RANGE` (3
-tiles) for the nearest recorded origin. `MasonFootprintBlocked` stops a new tower
-from overlapping an existing one by checking the only origins that could share a
-square of a 2x2 footprint.
+Ruin, rebuild and raze do not require the player to stand on the structure (they
+are moved off when it goes up). Each searches out to `MASON_SEARCH_RANGE` for the
+nearest recorded origin, then recomputes that entry's tile list to know what it
+covers — so razing clears occupancy from the squares actually used, whatever shape
+they form.
 
 ## What does not survive a reset
 

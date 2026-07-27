@@ -189,6 +189,7 @@ It exists so you never hand-build a tile location. Use it rather than raw
 | One tile | `GetTileIDAt`, `GetTileOrientationAt`, `GetTileHeightAt`, `SetTileAt` |
 | Batches | `TileBatch`, `TileBatchAdd`, `TileBatchCount`, `TileBatchApply` |
 | Groups | `TileGroup`, `TileGroupAdd`, `TileGroupCount`, `TileGroupFits`, `TileGroupStamp`, `TileGroupStampAtLocation` |
+| Tile lists | `TileGroupTiles`, `TileListCount`, `TileListX`, `TileListY` |
 | Snapshot | `TileSnapshotRect`, `TileSnapshotGroup` |
 | Rotation | `TileBlockRotate` (square), `TileBlockRotate180` (rectangle) |
 
@@ -222,6 +223,38 @@ TileGroupStamp(oArea, nX, nY, TILE_ROTATE_NONE, jTower,
 Group offsets rotate **about the origin tile**, not the group's centre, so
 stamping a 2x2 group at 90° shifts its footprint one tile west. That is the
 contract, not a bug.
+
+### Never reason about a footprint with a width and height
+
+`TileGroupTiles(oArea, nX, nY, nRotation, jGroup)` returns the exact squares a
+group covers, rotation applied, as a *tile list* read back with `TileListCount` /
+`TileListX` / `TileListY`. It writes nothing, so it also answers "which squares
+would this cover?" before committing.
+
+Always prefer it to a stored width/height, because a bounding box is the wrong
+shape to reason with:
+
+- Non-square features are the **majority** in most tilesets.
+- Some features are **not solid rectangles**: a `.set` can leave holes, so a
+  box-based collision test falsely claims squares the feature doesn't occupy.
+  `Merchant_Docked` is 5 tiles in a 2×3 box — the sixth stays usable by something
+  else.
+- Rotation moves the offsets, so a box computed at rotation 0 is wrong at 90°.
+
+```nwscript
+json jTiles = TileGroupTiles(oArea, nX, nY, nRotation, jGroup);
+int nIndex;
+for (nIndex = 0; nIndex < TileListCount(jTiles); nIndex++)
+{
+    int nTileX = TileListX(jTiles, nIndex);
+    int nTileY = TileListY(jTiles, nIndex);
+    // bounds check / collision mark / edge test / keep-out
+}
+```
+
+`example_mason/inc_mason.nss` is written this way throughout — a mixed catalogue
+(2×2 tower, 2×1 guard post) with no size constant anywhere. If you find yourself
+writing `MY_STRUCTURE_SIZE`, use a tile list instead.
 
 ### Snapshot and undo
 

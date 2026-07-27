@@ -53,16 +53,20 @@ coupling removed.
 
 ### Worked example (`nss/example_mason/`)
 
+A deliberately mixed-size catalogue — a 2x2 tower and a 2x1 guard post — because
+nothing in it may assume a square footprint.
+
 | File | Purpose |
 | --- | --- |
-| `inc_mason.nss` | Tower definitions, per-tower state, the four operations. |
-| `mason_raise.nss` | Dialog action — raise a watchtower where the player stands. |
+| `inc_mason.nss` | The catalogue, per-structure state, and the operations. Shape-agnostic: works from `TileGroupTiles()` rather than a width and height. |
+| `mason_raise.nss` | Dialog action — raise a 2x2 watchtower where the player stands. |
+| `mason_post.nss` | Dialog action — raise a 2x1 guard post. The non-square proof. |
 | `mason_ruin.nss` / `mason_build.nss` | Dialog actions — swap the tower for its ruined variant and back. |
 | `mason_raze.nss` | Dialog action — restore the original ground from the snapshot. |
 | `mason_c_top.nss` | Greeting conditional; fills the `<CUSTOM430>` status token. |
-| `mason_c_new.nss` | Gate — right tileset, room to build, nothing too close. |
+| `mason_c_new.nss` | Gate — right tileset and room for the smallest entry. |
 | `mason_c_old.nss` | Gate — any of the mason's work within reach. |
-| `mason_c_int.nss` / `mason_c_rui.nss` | Gates — the structure is currently whole / ruined. |
+| `mason_c_int.nss` / `mason_c_rui.nss` | Gates — the structure has a ruined / whole counterpart. |
 
 ### Resources
 

@@ -151,6 +151,21 @@ json TileGroupAdd(json jGroup, int nOffsetX, int nOffsetY, int nTileID, int nOri
 // Number of tiles in a group.
 int TileGroupCount(json jGroup);
 
+// The absolute tiles a group would occupy if stamped at (nOriginX,nOriginY) with
+// nRotation, as a "tile list" - a JSON array of {"x":..,"y":..}. Nothing is read
+// or written, so it is also the way to ask "which squares would this cover?"
+// without touching the area.
+//
+// Use this rather than re-deriving a footprint from a width and height: a feature
+// is not always a solid rectangle (a .set can leave holes in one) and rotation
+// moves the offsets, so a bounding box is the wrong shape to reason with.
+json TileGroupTiles(object oArea, int nOriginX, int nOriginY, int nRotation, json jGroup);
+
+// Read back a tile list. TileListX/Y return 0 for an out-of-range index.
+int TileListCount(json jTiles);
+int TileListX(json jTiles, int nIndex);
+int TileListY(json jTiles, int nIndex);
+
 // TRUE if every tile the group would touch, after rotating by nRotation, is in
 // bounds. Reads nothing and writes nothing.
 int TileGroupFits(object oArea, int nOriginX, int nOriginY, int nRotation, json jGroup);
@@ -354,6 +369,43 @@ json TileGroupAdd(json jGroup, int nOffsetX, int nOffsetY, int nTileID, int nOri
 int TileGroupCount(json jGroup)
 {
     return JsonGetLength(jGroup);
+}
+
+json TileGroupTiles(object oArea, int nOriginX, int nOriginY, int nRotation, json jGroup)
+{
+    json jTiles = JsonArray();
+
+    int nCount = JsonGetLength(jGroup);
+    int nIndex;
+    for (nIndex = 0; nIndex < nCount; nIndex++)
+    {
+        int nOffsetX = _TileGroupFieldAt(jGroup, nIndex, "dx");
+        int nOffsetY = _TileGroupFieldAt(jGroup, nIndex, "dy");
+
+        json jTile = JsonObject();
+        JsonObjectSetInplace(jTile, "x",
+            JsonInt(nOriginX + _TileRotatedOffsetX(nOffsetX, nOffsetY, nRotation)));
+        JsonObjectSetInplace(jTile, "y",
+            JsonInt(nOriginY + _TileRotatedOffsetY(nOffsetX, nOffsetY, nRotation)));
+
+        JsonArrayInsertInplace(jTiles, jTile);
+    }
+    return jTiles;
+}
+
+int TileListCount(json jTiles)
+{
+    return JsonGetLength(jTiles);
+}
+
+int TileListX(json jTiles, int nIndex)
+{
+    return JsonGetInt(JsonObjectGet(JsonArrayGet(jTiles, nIndex), "x"));
+}
+
+int TileListY(json jTiles, int nIndex)
+{
+    return JsonGetInt(JsonObjectGet(JsonArrayGet(jTiles, nIndex), "y"));
 }
 
 int TileGroupFits(object oArea, int nOriginX, int nOriginY, int nRotation, json jGroup)

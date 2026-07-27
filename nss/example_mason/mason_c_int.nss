@@ -1,4 +1,5 @@
-// Dialog conditional: only offer to ruin a tower that is currently whole.
+// Dialog conditional: only offer to ruin work that HAS a ruined form and is
+// currently whole.
 #include "inc_mason"
 
 int StartingConditional()
@@ -8,5 +9,7 @@ int StartingConditional()
     vector vPos = GetPosition(oPC);
     vector vFound = MasonFindWork(oArea, TileXFromPosition(vPos), TileYFromPosition(vPos));
     if (vFound.z < 1.0) return FALSE;
-    return !MasonIsRuined(oArea, FloatToInt(vFound.x), FloatToInt(vFound.y));
+
+    int nKind = MasonKindAt(oArea, FloatToInt(vFound.x), FloatToInt(vFound.y));
+    return (MasonRuinOf(nKind) >= 0);
 }

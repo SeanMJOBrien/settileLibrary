@@ -63,7 +63,7 @@
               "__struct_id": 1,
               "Active": {
                 "type": "resref",
-                "value": "mason_c_int"
+                "value": "mason_c_new"
               },
               "Index": {
                 "type": "dword",
@@ -78,7 +78,7 @@
               "__struct_id": 2,
               "Active": {
                 "type": "resref",
-                "value": "mason_c_rui"
+                "value": "mason_c_int"
               },
               "Index": {
                 "type": "dword",
@@ -93,7 +93,7 @@
               "__struct_id": 3,
               "Active": {
                 "type": "resref",
-                "value": "mason_c_old"
+                "value": "mason_c_rui"
               },
               "Index": {
                 "type": "dword",
@@ -108,11 +108,26 @@
               "__struct_id": 4,
               "Active": {
                 "type": "resref",
-                "value": ""
+                "value": "mason_c_old"
               },
               "Index": {
                 "type": "dword",
                 "value": 4
+              },
+              "IsChild": {
+                "type": "byte",
+                "value": 0
+              }
+            },
+            {
+              "__struct_id": 5,
+              "Active": {
+                "type": "resref",
+                "value": ""
+              },
+              "Index": {
+                "type": "dword",
+                "value": 5
               },
               "IsChild": {
                 "type": "byte",
@@ -173,7 +188,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 5
+                "value": 6
               },
               "IsChild": {
                 "type": "byte",
@@ -188,7 +203,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 4
+                "value": 5
               },
               "IsChild": {
                 "type": "byte",
@@ -249,7 +264,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 5
+                "value": 6
               },
               "IsChild": {
                 "type": "byte",
@@ -264,7 +279,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 4
+                "value": 5
               },
               "IsChild": {
                 "type": "byte",
@@ -288,7 +303,7 @@
         "Text": {
           "type": "cexolocstring",
           "value": {
-            "0": "As you will. We take the roof and the floors, and leave the shell."
+            "0": "Two spans across and one deep. It will do to watch a road."
           }
         }
       },
@@ -325,7 +340,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 5
+                "value": 6
               },
               "IsChild": {
                 "type": "byte",
@@ -340,7 +355,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 4
+                "value": 5
               },
               "IsChild": {
                 "type": "byte",
@@ -364,7 +379,7 @@
         "Text": {
           "type": "cexolocstring",
           "value": {
-            "0": "Good. It deserves better than to stand there gaping."
+            "0": "As you will. We take the roof and the floors, and leave the shell."
           }
         }
       },
@@ -401,7 +416,7 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 5
+                "value": 6
               },
               "IsChild": {
                 "type": "byte",
@@ -416,7 +431,83 @@
               },
               "Index": {
                 "type": "dword",
-                "value": 4
+                "value": 5
+              },
+              "IsChild": {
+                "type": "byte",
+                "value": 1
+              }
+            }
+          ]
+        },
+        "Script": {
+          "type": "resref",
+          "value": ""
+        },
+        "Sound": {
+          "type": "resref",
+          "value": ""
+        },
+        "Speaker": {
+          "type": "cexostring",
+          "value": ""
+        },
+        "Text": {
+          "type": "cexolocstring",
+          "value": {
+            "0": "Good. It deserves better than to stand there gaping."
+          }
+        }
+      },
+      {
+        "__struct_id": 5,
+        "Animation": {
+          "type": "dword",
+          "value": 0
+        },
+        "AnimLoop": {
+          "type": "byte",
+          "value": 1
+        },
+        "Comment": {
+          "type": "cexostring",
+          "value": ""
+        },
+        "Delay": {
+          "type": "dword",
+          "value": 4294967295
+        },
+        "Quest": {
+          "type": "cexostring",
+          "value": ""
+        },
+        "RepliesList": {
+          "type": "list",
+          "value": [
+            {
+              "__struct_id": 0,
+              "Active": {
+                "type": "resref",
+                "value": ""
+              },
+              "Index": {
+                "type": "dword",
+                "value": 6
+              },
+              "IsChild": {
+                "type": "byte",
+                "value": 1
+              }
+            },
+            {
+              "__struct_id": 1,
+              "Active": {
+                "type": "resref",
+                "value": ""
+              },
+              "Index": {
+                "type": "dword",
+                "value": 5
               },
               "IsChild": {
                 "type": "byte",
@@ -445,7 +536,7 @@
         }
       },
       {
-        "__struct_id": 5,
+        "__struct_id": 6,
         "Animation": {
           "type": "dword",
           "value": 0
@@ -493,7 +584,7 @@
   },
   "NumWords": {
     "type": "dword",
-    "value": 98
+    "value": 117
   },
   "PreventZoomIn": {
     "type": "byte",
@@ -611,7 +702,7 @@
         },
         "Script": {
           "type": "resref",
-          "value": "mason_ruin"
+          "value": "mason_post"
         },
         "Sound": {
           "type": "resref",
@@ -620,7 +711,7 @@
         "Text": {
           "type": "cexolocstring",
           "value": {
-            "0": "Let the tower fall to ruin."
+            "0": "Put up a guard post instead."
           }
         }
       },
@@ -672,7 +763,7 @@
         },
         "Script": {
           "type": "resref",
-          "value": "mason_build"
+          "value": "mason_ruin"
         },
         "Sound": {
           "type": "resref",
@@ -681,7 +772,7 @@
         "Text": {
           "type": "cexolocstring",
           "value": {
-            "0": "Rebuild the ruin whole again."
+            "0": "Let the tower fall to ruin."
           }
         }
       },
@@ -733,7 +824,7 @@
         },
         "Script": {
           "type": "resref",
-          "value": "mason_raze"
+          "value": "mason_build"
         },
         "Sound": {
           "type": "resref",
@@ -742,7 +833,7 @@
         "Text": {
           "type": "cexolocstring",
           "value": {
-            "0": "Pull it down altogether."
+            "0": "Rebuild the ruin whole again."
           }
         }
       },
@@ -794,6 +885,67 @@
         },
         "Script": {
           "type": "resref",
+          "value": "mason_raze"
+        },
+        "Sound": {
+          "type": "resref",
+          "value": ""
+        },
+        "Text": {
+          "type": "cexolocstring",
+          "value": {
+            "0": "Pull it down altogether."
+          }
+        }
+      },
+      {
+        "__struct_id": 5,
+        "Animation": {
+          "type": "dword",
+          "value": 0
+        },
+        "AnimLoop": {
+          "type": "byte",
+          "value": 1
+        },
+        "Comment": {
+          "type": "cexostring",
+          "value": ""
+        },
+        "Delay": {
+          "type": "dword",
+          "value": 0
+        },
+        "EntriesList": {
+          "type": "list",
+          "value": [
+            {
+              "__struct_id": 0,
+              "Active": {
+                "type": "resref",
+                "value": ""
+              },
+              "Index": {
+                "type": "dword",
+                "value": 6
+              },
+              "IsChild": {
+                "type": "byte",
+                "value": 0
+              },
+              "LinkComment": {
+                "type": "cexostring",
+                "value": ""
+              }
+            }
+          ]
+        },
+        "Quest": {
+          "type": "cexostring",
+          "value": ""
+        },
+        "Script": {
+          "type": "resref",
           "value": ""
         },
         "Sound": {
@@ -808,7 +960,7 @@
         }
       },
       {
-        "__struct_id": 5,
+        "__struct_id": 6,
         "Animation": {
           "type": "dword",
           "value": 0
