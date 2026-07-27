@@ -4,3 +4,7 @@
 
 # Local build scratch (include shims, etc.)
 .build/
+
+# Demo module build artifacts
+demo/build/
+demo/*.mod

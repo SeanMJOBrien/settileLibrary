@@ -386,6 +386,8 @@ deliberately not built.
 - Tile IDs came from `tcn01.set` and were cross-checked two ways: against the
   group definitions and against the tile model names, then independently
   reproduced by `set_groups.py`.
-- **Not tested in game.** That needs a live server: the tileset check, the visual
-  result of each stamp, and whether `MasonStepClear` reliably keeps a player off a
-  tower footprint all want confirming in a tcn01 area.
+- **Not tested in game.** Everything above is static verification. The visual
+  result of each stamp, walkability, and whether a player is reliably kept off a
+  footprint can only be confirmed by playing. Build `demo/SetTileDemo.mod` with
+  `bash demo/build_demo.sh` and see [demo/README.md](demo/README.md) for the cases
+  worth trying.

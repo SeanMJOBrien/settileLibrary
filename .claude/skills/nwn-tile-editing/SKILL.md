@@ -342,6 +342,15 @@ re-stamp from `OnModuleLoad`. A campaign DB cannot be enumerated, so keep a
 per-area index string alongside. Do not bother saving the undo snapshot — after a
 reset the pristine `.are` tiles *are* the undo.
 
+## Trying it in game
+
+`bash demo/build_demo.sh` builds `demo/SetTileDemo.mod` — a 10x10 tcn01 yard with
+the mason NPC and a lever wired to `tile_demo`, no haks or custom TLK. This is the
+only way to check the things static analysis cannot: how a stamp actually looks,
+walkability, and whether creatures get stranded. See `demo/README.md` for the map
+and a list of cases worth trying (overlapping footprints, mixed sizes, building on
+the area edge).
+
 ## Worked example and full reference
 
 - `nss/example_mason/` — a complete player-facing feature: an

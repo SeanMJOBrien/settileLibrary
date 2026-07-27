@@ -86,6 +86,22 @@ nothing in it may assume a square footprint.
 Both tools are stdlib-only Python 3 and take a plain `.set` file, so they work on
 stock, hak and custom tilesets alike.
 
+### Demo module (`demo/`)
+
+| File | Purpose |
+| --- | --- |
+| `build_demo.sh` | Builds `demo/SetTileDemo.mod` from the repo's own sources. |
+| `make_demo.py` | Generates the module, area and instances as GFF-JSON. |
+| `README.md` | Map of the yard and what to try in game. |
+
+```sh
+bash demo/build_demo.sh
+cp demo/SetTileDemo.mod ~/.local/share/Neverwinter\ Nights/modules/
+```
+
+A 10×10 tcn01 yard with the mason in it and a lever wired to `tile_demo`. No haks,
+no custom TLK. See [demo/README.md](demo/README.md).
+
 ### Claude Code skill (`.claude/skills/`)
 
 | File | Purpose |

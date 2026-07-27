@@ -16,6 +16,13 @@ const int DEMO_TOWER_NW = 282;
 const int DEMO_TOWER_NE = 284;
 
 const int DEMO_PATCH_SIZE = 3;
+
+// The work happens this many tiles NORTH of the placeable rather than under it.
+// Tile edits ignore placeables already standing on a tile, so a lever that
+// stamped a tower onto its own square would end up buried in the stonework and
+// unusable. Keeping the switch clear of the work area is the general lesson.
+const int DEMO_WORK_OFFSET = 2;
+
 const string DEMO_VAR_STEP = "tile_demo_step";
 const string DEMO_VAR_UNDO = "tile_demo_undo";
 
@@ -30,7 +37,7 @@ void main()
     // A world position becomes a tile index only through these helpers - the tile
     // functions take a grid reference, never a world position.
     int nX = TileXFromPosition(vPos);
-    int nY = TileYFromPosition(vPos);
+    int nY = TileYFromPosition(vPos) + DEMO_WORK_OFFSET;
 
     int nStep = GetLocalInt(OBJECT_SELF, DEMO_VAR_STEP) % 3;
     SetLocalInt(OBJECT_SELF, DEMO_VAR_STEP, nStep + 1);
