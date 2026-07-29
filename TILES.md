@@ -6,6 +6,10 @@ file list, see [README.md](README.md).
 
 ## Contents
 
+New to this? Start with the walkthrough: **[docs/BUILDERS.md](docs/BUILDERS.md)** —
+adding your own feature, start to finish. This document is the reference it links
+into.
+
 - [The one rule: a tile location is a grid reference](#the-one-rule-a-tile-location-is-a-grid-reference)
 - [The library](#the-library)
 - [For a builder](#for-a-builder)
@@ -178,37 +182,19 @@ which is what the mason's ruin/rebuild options do.
 
 ## For a builder
 
+> **Doing this for the first time?** [docs/BUILDERS.md](docs/BUILDERS.md) is the
+> step-by-step route — extract the `.set`, pick a feature, stamp it, undo it — with
+> the commands to run in order. This section is the reference behind those steps.
+
 ### Finding tile IDs
 
 Tile IDs are indexes into the tileset's `.set` file and mean nothing outside it —
 ID 277 is a tower quadrant in tcn01 and something unrelated in any other tileset.
-There is no way to read a `.set` from NWScript, so the lookup is a build-time job.
-
-Extract the `.set`, then survey it with `tools/set_analyze.py`:
-
-```sh
-nwn_resman_cat --root ~/nwn-data --userdirectory ~/nwn-data/user \
-    tcn01.set > /tmp/tcn01.set
-python3 tools/set_analyze.py /tmp/tcn01.set          # full survey
-python3 tools/set_analyze.py /tmp/tcn01.set shapes   # just the shape census
-```
-
-Once you know which feature you want, `tools/set_groups.py` emits it:
-
-```sh
-python3 tools/set_groups.py /tmp/tcn01.set cloaktower
-```
-
-```nwscript
-// GROUP68 CloakTower_2x2  2x2 (columns x rows)
-json jGroup = TileGroup();
-jGroup = TileGroupAdd(jGroup, 0, 0, 277, 0);        // tcn01_u01_01
-jGroup = TileGroupAdd(jGroup, 1, 0, 283, 0);        // tcn01_v01_01
-jGroup = TileGroupAdd(jGroup, 0, 1, 282, 0);        // tcn01_u02_01
-jGroup = TileGroupAdd(jGroup, 1, 1, 284, 0);        // tcn01_v02_01
-```
-
-For a tileset in a hak, unpack it first with `nwn_erf -x -f some.hak`.
+There is no way to read a `.set` from NWScript, so the lookup is a build-time job,
+done with `tools/set_analyze.py` (survey a tileset) and `tools/set_groups.py`
+(emit one feature as `TileGroupAdd()` calls). The commands live in
+[BUILDERS.md steps 2–5](docs/BUILDERS.md); what follows is what those tools are
+protecting you from.
 
 ### Four things that bite when reading a .set
 

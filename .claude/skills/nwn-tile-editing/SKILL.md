@@ -353,6 +353,11 @@ the area edge).
 
 ## Worked example and full reference
 
+If the user is adding a feature of their own, walk them through
+`docs/BUILDERS.md` — it is the ordered route (extract the `.set`, survey, generate
+the group, guard the tileset, snapshot, stamp, undo) and links into `TILES.md` for
+each concept. Prefer following it to improvising an order.
+
 - `nss/example_mason/` — a complete player-facing feature: an
   NPC who raises / ruins / rebuilds / razes a watchtower through dialog, with
   per-structure state on the area and gated dialog options.

@@ -86,6 +86,12 @@ nothing in it may assume a square footprint.
 Both tools are stdlib-only Python 3 and take a plain `.set` file, so they work on
 stock, hak and custom tilesets alike.
 
+### Documentation (`docs/`)
+
+| File | Purpose |
+| --- | --- |
+| `BUILDERS.md` | **Start here to add your own feature.** Step-by-step walkthrough; links into `TILES.md` for the concepts rather than restating them. |
+
 ### Demo module (`demo/`)
 
 | File | Purpose |
@@ -170,7 +176,8 @@ The engine header is inconsistent about this: `SetTileMainLightColor` documents
 says *"the location of the tile"*. Both are grid references. Build them with
 `TileLocation()` and convert with `TileXFromPosition()` / `TileYFromPosition()`.
 
-Full reference, builder workflow and caveats: **[TILES.md](TILES.md)**.
+Adding your own feature, step by step: **[docs/BUILDERS.md](docs/BUILDERS.md)**.
+Full reference and caveats: **[TILES.md](TILES.md)**.
 
 ---
 
@@ -197,10 +204,11 @@ mode here:
 | 1 | `nss/inc_tile.nss` | Header comment block |
 | 2 | `README.md` | Files table, API summary, install/verify commands |
 | 3 | `TILES.md` | Full reference — usually needs the most |
-| 4 | `.claude/skills/nwn-tile-editing/SKILL.md` | In-repo skill |
-| 5 | `~/.claude/skills/nwn-tile-editing/SKILL.md` | Global skill, if installed |
+| 4 | `docs/BUILDERS.md` | The walkthrough. Holds the tool commands; check its links into `TILES.md` still resolve if you rename a heading there |
+| 5 | `.claude/skills/nwn-tile-editing/SKILL.md` | In-repo skill |
+| 6 | `~/.claude/skills/nwn-tile-editing/SKILL.md` | Global skill, if installed |
 
-**4 and 5 are two copies that intentionally differ and are deliberately not
+**5 and 6 are two copies that intentionally differ and are deliberately not
 symlinked** — the repo copy uses repo-relative paths and carries a "ships inside
 the repo" blockquote; a global install uses absolute paths. A symlink would break
 one context or the other. After editing either, `diff` them: only the
