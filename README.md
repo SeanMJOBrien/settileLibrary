@@ -219,3 +219,13 @@ Before calling a change done:
 - **If tile IDs or `.set` handling changed**, re-verify against a real `.set` with
   `tools/set_groups.py`.
 - **Check every path and symbol** named in the docs still resolves.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+The stock tile IDs and tileset names referenced in the docs and examples describe
+BioWare's Neverwinter Nights game data; they are facts about that data, not part
+of this software, and no game assets are redistributed here.
